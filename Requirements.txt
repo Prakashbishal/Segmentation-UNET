@@ -1,0 +1,8 @@
+torch
+torchvision
+torchaudio --index-url https://download.pytorch.org/whl/cpu
+numpy
+matplotlib
+tqdm
+opencv-python
+scikit-learn
