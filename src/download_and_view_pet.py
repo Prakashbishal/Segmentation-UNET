@@ -1,3 +1,5 @@
+# Downloading a segmentation dataset automatically (no manual download)
+
 import matplotlib.pyplot as plt
 from torchvision.datasets import OxfordIIITPet
 from torchvision.transforms import ToTensor
@@ -13,7 +15,7 @@ ds = OxfordIIITPet(
     download=True,
 )
 
-img, mask = ds[0]
+img, mask = ds[6]
 
 plt.figure(figsize=(8, 4))
 plt.subplot(1, 2, 1)

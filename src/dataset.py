@@ -1,3 +1,5 @@
+# Converting this mask to binary
+
 import torch
 import numpy as np
 from torchvision.datasets import OxfordIIITPet
@@ -34,7 +36,6 @@ class PetSegmentationDataset(torch.utils.data.Dataset):
         mask = np.array(mask).astype(np.int64)
 
         # Oxford-IIIT Pet is a trimap.
-        # Most common encodings are:
         # - {0: background, 1: pet, 2: border}
         # - {1: pet, 2: background, 3: border}
         # We map "pet OR border" to 1, background to 0.

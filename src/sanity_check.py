@@ -1,3 +1,5 @@
+#Code to see the versions and CUDA(GPU) Availability
+
 import torch
 import torchvision
 print("Torch:", torch.__version__)

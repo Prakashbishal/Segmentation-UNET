@@ -1,8 +1,10 @@
+# Verifying the binary mask
+
 import matplotlib.pyplot as plt
 from dataset import PetSegmentationDataset
 
 ds = PetSegmentationDataset(root="data")
-img, mask = ds[0]
+img, mask = ds[6]
 
 plt.figure(figsize=(8,4))
 plt.subplot(1,2,1)
