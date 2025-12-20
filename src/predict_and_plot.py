@@ -5,16 +5,16 @@ from dataset import PetSegmentationDataset
 from unet import UNet
 
 
-def overlay_mask(img, mask, alpha=0.5):
+def overlay_mask_red(img, mask, alpha=0.45):
     """
-    img: [H,W,3] numpy in [0,1]
-    mask: [H,W] numpy in {0,1}
-    returns overlay image
+    img: [H,W,3] in [0,1]
+    mask: [H,W] in {0,1}
     """
     overlay = img.copy()
-    overlay[..., 1] = overlay[..., 1] * (1 - alpha * mask)  # reduce green where mask=1
-    overlay[..., 0] = overlay[..., 0] * (1 - alpha * mask)  # reduce red where mask=1
-    # blue channel remains -> gives a bluish highlight region
+    # add red tint where mask==1
+    overlay[..., 0] = overlay[..., 0] * (1 - alpha * mask) + alpha * mask
+    overlay[..., 1] = overlay[..., 1] * (1 - alpha * mask)
+    overlay[..., 2] = overlay[..., 2] * (1 - alpha * mask)
     return overlay
 
 
@@ -22,27 +22,28 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Using device:", device)
 
-    # Load one sample
-    ds = PetSegmentationDataset(root="data", split="trainval", img_size=128)
-    img, gt_mask = ds[0]  # try different indices later
+    IMG_SIZE = 256
+    ckpt_path = "runs/unet_pet_upgraded_best.pth"  # best checkpoint from upgraded training
 
-    # Load trained model
+    ds = PetSegmentationDataset(root="data", split="trainval", img_size=IMG_SIZE)
+
+    idx = 0  # change to see different images
+    img, gt_mask = ds[idx]
+
     model = UNet().to(device)
-    model.load_state_dict(torch.load("runs/unet_pet_baseline.pth", map_location=device))
+    model.load_state_dict(torch.load(ckpt_path, map_location=device))
     model.eval()
 
     with torch.no_grad():
-        logits = model(img.unsqueeze(0).to(device))  # [1,1,H,W]
-        probs = torch.sigmoid(logits).cpu().squeeze(0).squeeze(0)  # [H,W]
+        logits = model(img.unsqueeze(0).to(device))
+        probs = torch.sigmoid(logits).cpu().squeeze(0).squeeze(0)
         pred_mask = (probs > 0.5).float()
 
-    # Convert to numpy for plotting
     img_np = img.permute(1, 2, 0).numpy()
     gt_np = gt_mask.squeeze(0).numpy()
     pred_np = pred_mask.numpy()
 
-    over_gt = overlay_mask(img_np, gt_np)
-    over_pred = overlay_mask(img_np, pred_np)
+    over_pred = overlay_mask_red(img_np, pred_np)
 
     plt.figure(figsize=(12, 8))
 
